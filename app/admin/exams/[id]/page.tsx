@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { prisma } from "@/lib/db/prisma";
+
+export const dynamic = "force-dynamic";
 
 type Plan = {
   outline?: { title: string; summary?: string }[];
@@ -6,24 +9,6 @@ type Plan = {
   rubricSummary?: string;
 };
 
-type ExamDetail = {
-  id: number;
-  title: string;
-  objectives: string;
-  rubric: string;
-  plan: Plan | null;
-  createdAt: string;
-  updatedAt: string;
-  documents: { id: number; name: string; mimeType: string; url: string }[];
-  assignments: { id: number; assignee: string; status: string }[];
-};
-
-async function fetchExam(id: string): Promise<ExamDetail> {
-  const res = await fetch(`/api/exams/${id}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to load exam");
-  const data = (await res.json()) as { exam: ExamDetail };
-  return data.exam;
-}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -36,9 +21,24 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default async function ExamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const exam = await fetchExam(id);
+  const idNum = Number(id);
+  const exam = await prisma.exam.findUnique({
+    where: { id: idNum },
+    include: {
+      documents: { select: { id: true, name: true, mimeType: true, url: true } },
+      assignments: { select: { id: true, assignee: true, status: true } },
+    },
+  });
+  if (!exam) {
+    return (
+      <div className="border-2 border-white p-4">
+        <p className="text-zinc-200">Exam not found.</p>
+        <p className="mt-2"><Link href="/admin/exams" className="underline underline-offset-4">Back to list</Link></p>
+      </div>
+    );
+  }
 
-  const plan = exam.plan;
+  const plan = exam.plan as unknown as Plan | null;
 
   return (
     <div className="space-y-6">

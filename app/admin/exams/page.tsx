@@ -1,22 +1,17 @@
 import Link from "next/link";
+import { prisma } from "@/lib/db/prisma";
 
-type Exam = {
-  id: number;
-  title: string;
-  createdAt: string;
-  documents: { id: number }[];
-  assignments: { id: number; assignee: string; status: string }[];
-};
-
-async function fetchExams(): Promise<Exam[]> {
-  const res = await fetch("/api/exams", { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to load exams");
-  const data = (await res.json()) as { exams: Exam[] };
-  return data.exams ?? [];
-}
+export const dynamic = "force-dynamic";
 
 export default async function AdminExamsPage() {
-  const exams = await fetchExams();
+  const exams = await prisma.exam.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      documents: { select: { id: true } },
+      assignments: { select: { id: true, assignee: true, status: true } },
+    },
+    take: 50,
+  });
 
   return (
     <div className="space-y-6">
