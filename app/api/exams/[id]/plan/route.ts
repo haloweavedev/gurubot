@@ -30,11 +30,18 @@ const planSchema = z.object({
 });
 
 export async function POST(
-  _req: Request,
+  req: Request,
   context: unknown
 ) {
   const params = (context as { params?: Record<string, string> }).params ?? {};
-  const idNum = Number(params.id);
+  let idNum = Number(params.id);
+  if (!Number.isFinite(idNum)) {
+    // Fallback: accept JSON body with id
+    try {
+      const body = (await req.json()) as { id?: number | string };
+      idNum = Number(body?.id);
+    } catch {}
+  }
   if (!Number.isFinite(idNum)) {
     return NextResponse.json({ error: "Invalid exam id" }, { status: 400 });
   }

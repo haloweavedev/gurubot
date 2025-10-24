@@ -20,6 +20,7 @@ model Exam {
   updatedAt  DateTime  @updatedAt
   documents  Document[]
   assignments Assignment[]
+  attempts   Attempt[]
 
   @@index([createdAt])
 }
@@ -47,4 +48,47 @@ model Assignment {
 
   @@index([examId])
   @@index([assignee])
+}
+
+model Attempt {
+  id          Int       @id @default(autoincrement())
+  exam        Exam      @relation(fields: [examId], references: [id])
+  examId      Int
+  assignee    String
+  status      String    @default("in_progress")
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  totalScore  Float?
+  answers     Answer[]
+  transcripts Transcript[]
+
+  @@index([examId])
+  @@index([assignee])
+}
+
+model Answer {
+  id         Int      @id @default(autoincrement())
+  attempt    Attempt  @relation(fields: [attemptId], references: [id])
+  attemptId  Int
+  questionId String
+  prompt     String
+  answerText String
+  score      Int
+  rationale  String
+  createdAt  DateTime @default(now())
+
+  @@index([attemptId])
+  @@index([questionId])
+}
+
+model Transcript {
+  id        Int      @id @default(autoincrement())
+  attempt   Attempt  @relation(fields: [attemptId], references: [id])
+  attemptId Int
+  role      String
+  text      String
+  ts        DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([attemptId])
 }
