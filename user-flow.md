@@ -48,4 +48,3 @@ Inputs: JSON; Outputs: JSON. VAPI invokes these tools; our API executes them and
 - Tool calls fetch at least one PDF snippet and compute rubric‑based feedback.
 - Transcript + result stored; simple summary displayed.
 
-..
