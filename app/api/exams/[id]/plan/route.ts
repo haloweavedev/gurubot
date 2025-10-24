@@ -103,18 +103,52 @@ Given the exam title, learning objectives, rubric text, and a list of document n
 - A short outline of 3-6 sections
 - 5-10 competency questions
 - A brief rubric summary for evaluators.
-If documents are not available, infer from objectives and rubric. JSON only.`;
+If documents are not available, infer from objectives and rubric. Return ONLY raw JSON (no code fences, no markdown).`;
 
   const { text } = await generateText({
     model: openai("gpt-4o-mini"),
-    prompt: `${prompt}\n\nReturn strict JSON with this shape: {"outline":[{"title":"string","summary":"string?"}],"questions":[{"id":"string","prompt":"string","competency":"string?"}],"rubricSummary":"string","objectives":"string","rubric":"string"}.\n\nInput:\nTitle: ${exam.title}\nExisting Objectives: ${exam.objectives || '(none)'}\nExisting Rubric: ${exam.rubric || '(none)'}\nDocuments: ${docNames.join(", ")}\n\nCorpus (may be truncated):\n${corpus}`,
+    prompt: `${prompt}\n\nReturn strict JSON with this shape: {"outline":[{"title":"string","summary":"string?"}],"questions":[{"id":"string","prompt":"string","competency":"string?"}],"rubricSummary":"string","objectives":"string","rubric":"string"}. Do not wrap in backticks.\n\nInput:\nTitle: ${exam.title}\nExisting Objectives: ${exam.objectives || '(none)'}\nExisting Rubric: ${exam.rubric || '(none)'}\nDocuments: ${docNames.join(", ")}\n\nCorpus (may be truncated):\n${corpus}`,
   });
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    return NextResponse.json({ error: "Model did not return valid JSON", raw: text }, { status: 502 });
+  function stripCodeFences(input: string): string {
+    let s = (input ?? "").trim();
+    s = s.replace(/^```[a-zA-Z]*\n/, "");
+    s = s.replace(/\n```\s*$/, "");
+    return s.trim();
+  }
+
+  function tryParseStrict(s: string): unknown | undefined {
+    try {
+      return JSON.parse(s);
+    } catch {
+      return undefined;
+    }
+  }
+
+  function extractAndParse(s: string): unknown | undefined {
+    const first = s.indexOf("{");
+    const last = s.lastIndexOf("}");
+    if (first >= 0 && last > first) {
+      const sub = s.slice(first, last + 1);
+      return tryParseStrict(sub);
+    }
+    return undefined;
+  }
+
+  const raw = text ?? "";
+  const stripped = stripCodeFences(raw);
+  const parsed: unknown =
+    tryParseStrict(stripped) ??
+    extractAndParse(stripped) ??
+    tryParseStrict(raw) ??
+    extractAndParse(raw);
+
+  if (parsed == null) {
+    console.warn("[exams:plan] Model did not return valid JSON", {
+      preview: raw.slice(0, 200),
+      length: raw.length,
+    });
+    return NextResponse.json({ error: "Model did not return valid JSON", raw }, { status: 502 });
   }
   const object = planSchema.parse(parsed);
 
