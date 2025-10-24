@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
+import { GeneratePlanButton } from "@/app/components/admin/GeneratePlanButton";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,8 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
             Created {new Date(exam.createdAt).toLocaleString()} • Updated {new Date(exam.updatedAt).toLocaleString()}
           </p>
         </div>
-        <div className="text-sm">
+        <div className="flex items-center gap-3 text-sm">
+          <GeneratePlanButton examId={exam.id} />
           <Link href="/admin/exams" className="underline underline-offset-4">Back to list</Link>
         </div>
       </div>
