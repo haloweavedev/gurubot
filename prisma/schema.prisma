@@ -1,0 +1,42 @@
+// Prisma schema for ExamBot MVP (Supabase Postgres)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Exam {
+  id         Int       @id @default(autoincrement())
+  title      String
+  objectives String
+  rubric     String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  documents  Document[]
+  assignments Assignment[]
+}
+
+model Document {
+  id        Int      @id @default(autoincrement())
+  exam      Exam     @relation(fields: [examId], references: [id])
+  examId    Int
+  name      String
+  mimeType  String
+  url       String   // Supabase Storage URL
+  createdAt DateTime @default(now())
+}
+
+model Assignment {
+  id        Int      @id @default(autoincrement())
+  exam      Exam     @relation(fields: [examId], references: [id])
+  examId    Int
+  assignee  String   // simple text user id (no auth)
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
+
