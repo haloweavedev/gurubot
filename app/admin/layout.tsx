@@ -25,9 +25,12 @@ export default function AdminLayout({
       <header className="border-b-2 border-white">
         <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold tracking-tight">Admin</h1>
-          <nav className="text-sm">
+          <nav className="text-sm space-x-4">
             <Link href="/" className="underline underline-offset-4 hover:no-underline">
               Home
+            </Link>
+            <Link href="/admin/exams" className="underline underline-offset-4 hover:no-underline">
+              Exams
             </Link>
           </nav>
         </div>

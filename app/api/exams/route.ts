@@ -36,3 +36,19 @@ export async function POST(req: Request) {
   }
 }
 
+export async function GET() {
+  try {
+    const exams = await prisma.exam.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        documents: true,
+        assignments: true,
+      },
+      take: 50,
+    });
+    return NextResponse.json({ exams });
+  } catch (err) {
+    console.error("[exams GET]", err);
+    return NextResponse.json({ error: "Failed to list exams" }, { status: 500 });
+  }
+}
