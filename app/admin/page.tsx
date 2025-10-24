@@ -17,8 +17,6 @@ function AdminInner() {
   const [email, setEmail] = useState<string>(params.get("user") ?? "");
   const [confirmed, setConfirmed] = useState(false);
   const [title, setTitle] = useState("");
-  const [objectives, setObjectives] = useState("");
-  const [rubric, setRubric] = useState("");
   const [assignee, setAssignee] = useState("");
   const [files, setFiles] = useState<FileList | null>(null);
   const [saving, setSaving] = useState(false);
@@ -87,16 +85,14 @@ function AdminInner() {
                   const res = await fetch("/api/exams", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ title, objectives, rubric, assignee, documents: uploaded }),
+                    body: JSON.stringify({ title, assignee, documents: uploaded }),
                   });
                   if (!res.ok) throw new Error("Failed to create exam");
                   const out = await res.json();
                   // Fire-and-forget planning job
                   fetch(`/api/exams/${out.id}/plan`, { method: "POST" }).catch(() => {});
-                  alert(`Exam created (#${out.id}). Planning started. Documents: ${uploaded.length}`);
+                  alert(`Exam created (#${out.id}). Auto‑generating Objectives & Rubric. Planning started. Documents: ${uploaded.length}`);
                   setTitle("");
-                  setObjectives("");
-                  setRubric("");
                   setAssignee("");
                   setFiles(null);
                 } catch (err) {
@@ -115,24 +111,6 @@ function AdminInner() {
                   placeholder="Intro to Biology — Midterm"
                   className="mt-1 w-full border-2 border-black px-3 py-2"
                   required
-                />
-              </div>
-              <div>
-                <label className="block text-xs uppercase font-bold">Learning Objectives</label>
-                <textarea
-                  value={objectives}
-                  onChange={(e) => setObjectives(e.target.value)}
-                  rows={3}
-                  className="mt-1 w-full border-2 border-black px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-xs uppercase font-bold">Rubric / Answer Key</label>
-                <textarea
-                  value={rubric}
-                  onChange={(e) => setRubric(e.target.value)}
-                  rows={4}
-                  className="mt-1 w-full border-2 border-black px-3 py-2"
                 />
               </div>
               <div>

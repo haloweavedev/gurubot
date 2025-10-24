@@ -29,6 +29,7 @@ model Document {
   name      String
   mimeType  String
   url       String   // Supabase Storage URL
+  text      String?  // Extracted plain text (PDF only for MVP)
   createdAt DateTime @default(now())
 }
 
