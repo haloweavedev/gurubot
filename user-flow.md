@@ -47,3 +47,5 @@ Inputs: JSON; Outputs: JSON. VAPI invokes these tools; our API executes them and
 - Learner completes a 3‑question voice session.
 - Tool calls fetch at least one PDF snippet and compute rubric‑based feedback.
 - Transcript + result stored; simple summary displayed.
+
+..
