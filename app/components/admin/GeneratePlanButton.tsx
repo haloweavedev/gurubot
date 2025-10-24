@@ -14,11 +14,13 @@ export function GeneratePlanButton({ examId }: { examId: number }) {
       const res = await fetch(`/api/exams/${examId}/plan`, { method: "POST" });
       if (!res.ok) {
         const text = await res.text();
+        console.error("[GeneratePlan] API error", { status: res.status, body: text });
         throw new Error(text || "Failed to generate plan");
       }
       startTransition(() => router.refresh());
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to generate";
+      console.error("[GeneratePlan] Failed", err);
       alert(message);
     } finally {
       setGenerating(false);
@@ -38,4 +40,3 @@ export function GeneratePlanButton({ examId }: { examId: number }) {
     </button>
   );
 }
-

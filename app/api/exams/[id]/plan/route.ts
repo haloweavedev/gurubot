@@ -34,15 +34,38 @@ export async function POST(
   context: unknown
 ) {
   const params = (context as { params?: Record<string, string> }).params ?? {};
-  let idNum = Number(params.id);
-  if (!Number.isFinite(idNum)) {
-    // Fallback: accept JSON body with id
+  const url = (() => {
     try {
-      const body = (await req.json()) as { id?: number | string };
-      idNum = Number(body?.id);
-    } catch {}
+      return new URL(req.url);
+    } catch {
+      return undefined;
+    }
+  })();
+
+  // Helper to parse JSON safely without throwing
+  async function tryParseJson<T>(): Promise<T | undefined> {
+    try {
+      return (await req.clone().json()) as T;
+    } catch {
+      return undefined;
+    }
   }
+
+  const pathMatch = url?.pathname.match(/\/api\/exams\/(\d+)\/plan/);
+  const pathId = pathMatch ? Number(pathMatch[1]) : NaN;
+  let idNum = Number(params.id);
+  if (!Number.isFinite(idNum) && Number.isFinite(pathId)) idNum = pathId;
   if (!Number.isFinite(idNum)) {
+    const body = await tryParseJson<{ id?: number | string }>();
+    if (body?.id != null) idNum = Number(body.id);
+  }
+
+  if (!Number.isFinite(idNum)) {
+    console.error("[exams:plan] Invalid exam id", {
+      url: url?.toString(),
+      pathname: url?.pathname,
+      params,
+    });
     return NextResponse.json({ error: "Invalid exam id" }, { status: 400 });
   }
 
@@ -50,7 +73,10 @@ export async function POST(
     where: { id: idNum },
     include: { documents: true },
   });
-  if (!exam) return NextResponse.json({ error: "Exam not found" }, { status: 404 });
+  if (!exam) {
+    console.error("[exams:plan] Exam not found", { id: idNum });
+    return NextResponse.json({ error: "Exam not found" }, { status: 404 });
+  }
 
   const docNames = exam.documents.map((d) => d.name);
 
@@ -62,8 +88,8 @@ export async function POST(
         const text = await fetchAndExtractPdf(doc.url);
         await prisma.document.update({ where: { id: doc.id }, data: { text } });
         corpus += `\n\n## Document: ${doc.name}\n${text}`;
-      } catch {
-        // skip on failure
+      } catch (e) {
+        console.warn("[exams:plan] PDF extract failed", { docId: doc.id, name: doc.name, url: doc.url, error: (e as Error)?.message });
       }
     } else if (doc.text) {
       corpus += `\n\n## Document: ${doc.name}\n${doc.text}`;

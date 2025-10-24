@@ -11,31 +11,34 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "vapi:upsert": "tsx scripts/update-vapi-tool.ts",
-    "vapi:tools:all": "tsx scripts/update-vapi-tools-all.ts"
+    "vapi:tools:all": "tsx scripts/update-vapi-tools-all.ts",
+    "vapi:provision": "tsx scripts/provision-vapi-tools.ts"
   },
   "dependencies": {
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "next": "16.0.0",
-    "ai": "^3.4.13",
-    "@ai-sdk/react": "^0.0.53",
     "@ai-sdk/openai": "^0.0.66",
-    "zod": "^3.23.8",
+    "@ai-sdk/react": "^0.0.53",
     "@prisma/client": "^5.21.1",
     "@supabase/supabase-js": "^2.45.0",
-    "pdf-parse": "^1.1.1"
+    "ai": "^3.4.13",
+    "next": "16.0.0",
+    "pdf-parse": "^1.1.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
+    "@vapi-ai/server-sdk": "^0.10.2",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
     "prisma": "^5.21.1",
-    "tsx": "^4.19.2"
+    "tailwindcss": "^4",
+    "tsx": "^4.20.6",
+    "typescript": "^5"
   },
   "packageManager": "pnpm@10.15.1+sha512.34e538c329b5553014ca8e8f4535997f96180a1d0f614339357449935350d924e22f8614682191264ec33d1462ac21561aff97f6bb18065351c162c7e8f6de67"
 }

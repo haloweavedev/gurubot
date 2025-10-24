@@ -8,6 +8,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
+// Load env
+import 'dotenv/config';
 // Lazy import to avoid type resolution issues if SDK isn't installed yet
 // @ts-ignore
 import { VapiClient } from "@vapi-ai/server-sdk";
@@ -32,13 +34,12 @@ function buildBaseUrl() {
 
 function buildTools(baseUrl: string) {
   const mk = (name: string, path: string, description: string) => ({
-    type: "server",
+    type: "apiRequest",
     name,
     description,
     url: `${baseUrl}${path}`,
     method: "POST",
-    // Optional: provide a minimal JSON schema
-    inputSchema: {
+    body: {
       type: "object",
       properties: {
         examId: { anyOf: [{ type: "number" }, { type: "string" }] },
@@ -53,8 +54,6 @@ function buildTools(baseUrl: string) {
       },
       additionalProperties: true,
     },
-    // Vapi may expect where to send the payload. Default: JSON body.
-    // If needed, add: bodyType: "json"
   });
 
   return [
@@ -93,9 +92,9 @@ async function run() {
         messages: [
           { role: "system", content: "You are an oral exam proctor. Ask one question at a time, keep responses under 40 words. Use tools to get questions and score answers." },
         ],
+        // Attach transient tools to the model
+        tools,
       },
-      // @ts-ignore actions/tools shape depends on SDK version
-      tools,
     } as any);
     assistantId = created?.id || created?.assistantId || created?.data?.id;
     if (!assistantId) throw new Error("Failed to create assistant: missing id in response");
@@ -104,11 +103,11 @@ async function run() {
     // Update tools and metadata
     await vapi.assistants.update(assistantId, {
       name,
-      // @ts-ignore actions/tools shape depends on SDK version
-      tools,
       model: {
         provider: modelProvider,
         model: modelName,
+        // Update model tools
+        tools,
       },
     } as any);
     console.log("Updated assistant:", assistantId);
@@ -134,4 +133,3 @@ run().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-
