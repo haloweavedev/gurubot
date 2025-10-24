@@ -15,6 +15,7 @@ model Exam {
   title      String
   objectives String
   rubric     String
+  plan       Json?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   documents  Document[]
@@ -39,4 +40,3 @@ model Assignment {
   status    String   @default("pending")
   createdAt DateTime @default(now())
 }
-
