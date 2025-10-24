@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Space_Grotesk } from "next/font/google";
 
 const spaceGrotesk = Space_Grotesk({
@@ -25,9 +26,9 @@ export default function AdminLayout({
         <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold tracking-tight">Admin</h1>
           <nav className="text-sm">
-            <a href="/" className="underline underline-offset-4 hover:no-underline">
+            <Link href="/" className="underline underline-offset-4 hover:no-underline">
               Home
-            </a>
+            </Link>
           </nav>
         </div>
       </header>
@@ -35,4 +36,3 @@ export default function AdminLayout({
     </div>
   );
 }
-

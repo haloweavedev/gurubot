@@ -1,20 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Space_Grotesk } from "next/font/google";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk" });
 
 export default function LearnerLogin() {
-  const params = useSearchParams();
-  const [email, setEmail] = useState("");
-  const [confirmed, setConfirmed] = useState(false);
+  return (
+    <Suspense fallback={<div className={`${spaceGrotesk.variable} min-h-dvh bg-black text-white`} style={{ fontFamily: "var(--font-space-grotesk)" }}><div className="mx-auto max-w-xl px-4 py-10">Loading…</div></div>}>
+      <LearnerInner />
+    </Suspense>
+  );
+}
 
-  useEffect(() => {
-    const qUser = params.get("user");
-    if (qUser) setEmail(qUser);
-  }, [params]);
+function LearnerInner() {
+  const params = useSearchParams();
+  const [email, setEmail] = useState<string>(params.get("user") ?? "");
+  const [confirmed, setConfirmed] = useState(false);
 
   return (
     <div className={`${spaceGrotesk.variable} min-h-dvh bg-black text-white`} style={{ fontFamily: "var(--font-space-grotesk)" }}>

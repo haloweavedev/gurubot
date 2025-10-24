@@ -1,17 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 export default function AdminPage() {
-  const params = useSearchParams();
-  const [email, setEmail] = useState("");
-  const [confirmed, setConfirmed] = useState(false);
+  return (
+    <Suspense fallback={<div className="max-w-xl">Loading…</div>}>
+      <AdminInner />
+    </Suspense>
+  );
+}
 
-  useEffect(() => {
-    const qUser = params.get("user");
-    if (qUser) setEmail(qUser);
-  }, [params]);
+function AdminInner() {
+  const params = useSearchParams();
+  const [email, setEmail] = useState<string>(params.get("user") ?? "");
+  const [confirmed, setConfirmed] = useState(false);
 
   return (
     <div className="max-w-xl">
