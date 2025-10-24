@@ -78,8 +78,37 @@ async function run() {
   const modelName = arg("--model", "gpt-4o");
   const firstMessage = arg("--firstMessage", "Hello! I will guide you through this oral exam.");
   const assistantIdArg = arg("--assistantId", process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID);
+  const systemPromptFile = arg("--systemPromptFile");
+  const systemPromptInline = arg("--systemPrompt");
+  const voiceProvider = arg("--voiceProvider");
+  const voiceId = arg("--voiceId");
+  const voiceModel = arg("--voiceModel");
+  const voiceStability = arg("--stability");
+  const voiceSimilarityBoost = arg("--similarityBoost");
 
   const tools = buildTools(baseUrl);
+
+  let systemPrompt = systemPromptInline;
+  if (!systemPrompt && systemPromptFile) {
+    try {
+      systemPrompt = fs.readFileSync(systemPromptFile, "utf8");
+    } catch (e) {
+      console.warn("[vapi:upsert] Failed to read systemPromptFile", systemPromptFile, (e as Error).message);
+    }
+  }
+  if (!systemPrompt) {
+    systemPrompt = "You are an oral exam proctor. Ask one question at a time, keep responses under 40 words. Use tools get_exam_context, get_next_question, score_answer, record_transcript, finalize_attempt, and search_pdf to drive the flow. Avoid filler like 'hold on'—pause briefly instead.";
+  }
+
+  const voice: any = voiceProvider && voiceId
+    ? {
+        provider: voiceProvider,
+        voiceId,
+        ...(voiceModel ? { model: voiceModel } : {}),
+        ...(voiceStability ? { stability: Number(voiceStability) } : {}),
+        ...(voiceSimilarityBoost ? { similarityBoost: Number(voiceSimilarityBoost) } : {}),
+      }
+    : undefined;
 
   let assistantId = assistantIdArg;
   if (!assistantId) {
@@ -90,11 +119,12 @@ async function run() {
         provider: modelProvider,
         model: modelName,
         messages: [
-          { role: "system", content: "You are an oral exam proctor. Ask one question at a time, keep responses under 40 words. Use tools to get questions and score answers." },
+          { role: "system", content: systemPrompt },
         ],
         // Attach transient tools to the model
         tools,
       },
+      ...(voice ? { voice } : {}),
     } as any);
     assistantId = created?.id || created?.data?.id;
     if (!assistantId) throw new Error("Failed to create assistant: missing id in response");
@@ -108,7 +138,11 @@ async function run() {
         model: modelName,
         // Update model tools
         tools,
+        messages: [
+          { role: "system", content: systemPrompt },
+        ],
       },
+      ...(voice ? { voice } : {}),
     } as any);
     console.log("Updated assistant:", assistantId);
   }
