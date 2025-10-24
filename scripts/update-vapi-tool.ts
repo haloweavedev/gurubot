@@ -83,7 +83,7 @@ async function run() {
 
   let assistantId = assistantIdArg;
   if (!assistantId) {
-    const created = await vapi.assistants.create({
+    const created: any = await vapi.assistants.create({
       name,
       firstMessage,
       model: {
@@ -96,7 +96,7 @@ async function run() {
         tools,
       },
     } as any);
-    assistantId = created?.id || created?.assistantId || created?.data?.id;
+    assistantId = created?.id || created?.data?.id;
     if (!assistantId) throw new Error("Failed to create assistant: missing id in response");
     console.log("Created assistant:", assistantId);
   } else {
