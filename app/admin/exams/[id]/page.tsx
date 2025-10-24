@@ -52,6 +52,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
         </div>
         <div className="flex items-center gap-3 text-sm">
           <GeneratePlanButton examId={exam.id} />
+          <Link href={`/learner/exams/${exam.id}`} className="underline underline-offset-4">Open Learner Exam</Link>
           <Link href="/admin/exams" className="underline underline-offset-4">Back to list</Link>
         </div>
       </div>
