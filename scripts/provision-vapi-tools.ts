@@ -88,7 +88,7 @@ async function run() {
   }
 
   // Fetch assistant to preserve provider/model
-  const a = await vapi.assistants.get(assistantId);
+  const a: any = await vapi.assistants.get(assistantId);
   const assistant: any = a?.data ?? a;
   const provider = assistant?.model?.provider || 'openai';
   const model = assistant?.model?.model || 'gpt-4o';
@@ -105,4 +105,3 @@ run().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-
