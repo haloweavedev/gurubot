@@ -20,6 +20,8 @@ model Exam {
   updatedAt  DateTime  @updatedAt
   documents  Document[]
   assignments Assignment[]
+
+  @@index([createdAt])
 }
 
 model Document {
@@ -31,6 +33,8 @@ model Document {
   url       String   // Supabase Storage URL
   text      String?  // Extracted plain text (PDF only for MVP)
   createdAt DateTime @default(now())
+
+  @@index([examId])
 }
 
 model Assignment {
@@ -40,4 +44,7 @@ model Assignment {
   assignee  String   // simple text user id (no auth)
   status    String   @default("pending")
   createdAt DateTime @default(now())
+
+  @@index([examId])
+  @@index([assignee])
 }

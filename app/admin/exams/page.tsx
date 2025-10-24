@@ -36,7 +36,11 @@ export default async function AdminExamsPage() {
             <li key={e.id} className="bg-white text-black p-4 border-2 border-white">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="font-semibold">#{e.id} — {e.title}</div>
+                  <div className="font-semibold">
+                    <Link href={`/admin/exams/${e.id}`} className="underline underline-offset-4">
+                      #{e.id} — {e.title}
+                    </Link>
+                  </div>
                   <div className="text-sm text-zinc-700">
                     {new Date(e.createdAt).toLocaleString()} • {e.documents.length} document{e.documents.length === 1 ? "" : "s"}
                   </div>
@@ -61,4 +65,3 @@ export default async function AdminExamsPage() {
     </div>
   );
 }
-
