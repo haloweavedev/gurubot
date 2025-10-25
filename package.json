@@ -12,7 +12,9 @@
     "prisma:migrate": "prisma migrate dev",
     "vapi:upsert": "tsx scripts/update-vapi-tool.ts",
     "vapi:tools:all": "tsx scripts/update-vapi-tools-all.ts",
-    "vapi:provision": "tsx scripts/provision-vapi-tools.ts"
+    "vapi:provision": "tsx scripts/provision-vapi-tools.ts",
+    "vapi:function:provision": "tsx scripts/provision-vapi-function-tools.ts",
+    "simulate:exam": "tsx scripts/simulate-exam.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.66",
