@@ -22,6 +22,9 @@ export const examFunctionTools = {
           required: [],
         },
         strict: true,
+        rejectionPlan: { conditions: [
+          { type: "liquid", liquid: "{{ function.arguments.examId | default: '' | size }} > 0 or {{ function.arguments.email | default: '' | size }} > 0" }
+        ]},
       },
       messages: [{ type: "request-start", content: "", blocking: false }],
     };
@@ -157,4 +160,3 @@ export function getAllFunctionTools(): VapiFunctionTool[] {
     examFunctionTools.search_pdf(),
   ];
 }
-

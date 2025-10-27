@@ -1,5 +1,24 @@
 import { prisma } from "@/lib/db/prisma";
 
+export function normalizeEmailLike(input?: string | null): string | undefined {
+  if (!input) return undefined;
+  let s = String(input).trim().toLowerCase();
+  // common speech artifacts
+  s = s.replace(/\s+at\s+/g, "@");
+  s = s.replace(/\s+dot\s+/g, ".");
+  s = s.replace(/\s+underscore\s+/g, "_");
+  s = s.replace(/\s+(dash|hyphen)\s+/g, "-");
+  s = s.replace(/\s+plus\s+/g, "+");
+  s = s.replace(/\s+(period|point)\s+/g, ".");
+  // collapse spaces
+  s = s.replace(/\s+/g, "");
+  // fix common endings
+  s = s.replace(/@gmailcom$/, "@gmail.com");
+  s = s.replace(/@yahooCom$/i, "@yahoo.com");
+  s = s.replace(/@outlookCom$/i, "@outlook.com");
+  return s;
+}
+
 export async function resolveExamId(input: {
   examId?: number | string | null;
   email?: string | null;
@@ -8,9 +27,10 @@ export async function resolveExamId(input: {
     const idNum = Number(input.examId);
     if (Number.isFinite(idNum)) return idNum;
   }
-  if (input.email) {
+  const normalizedEmail = normalizeEmailLike(input.email);
+  if (normalizedEmail) {
     const assignment = await prisma.assignment.findFirst({
-      where: { assignee: input.email },
+      where: { assignee: normalizedEmail },
       orderBy: { createdAt: "desc" },
       select: { examId: true },
     });
@@ -48,4 +68,3 @@ export async function resolveAttempt(input: {
   });
   return created;
 }
-

@@ -9,6 +9,12 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as { message?: VapiWebhookMessage };
     const msg = body?.message;
+    // Lightweight tracing for tool calls
+    if (msg?.type) {
+      const call = (msg as VapiWebhookMessage).call as { id?: string } | undefined;
+      const callIdLog = typeof call?.id === 'string' ? call!.id : '';
+      console.log(`[VAPI] message type=${msg.type} callId=${callIdLog}`);
+    }
     if (!msg) return NextResponse.json({ status: "ignored" });
 
     if (msg.type === "tool-calls") {
@@ -29,7 +35,7 @@ export async function POST(req: Request) {
         const name = item.function.name;
         const rawArgs = item.function.arguments;
         const args = typeof rawArgs === "string" ? safeParse(rawArgs) : rawArgs;
-
+        try { console.log(`[VAPI] tool=${name} args=${JSON.stringify(args).slice(0, 400)}`); } catch {}
         const handler = handlers[name];
         if (!handler) {
           results.push({ toolCallId, error: `Unknown tool: ${name}` });
@@ -45,7 +51,8 @@ export async function POST(req: Request) {
             error: toolResponse.error,
             message: toolResponse.message,
           });
-        } catch {
+        } catch (err) {
+          console.error(`[VAPI] error in ${name}:`, (err as Error)?.message);
           results.push({ toolCallId, error: `Internal error in ${name}` });
         }
       }
